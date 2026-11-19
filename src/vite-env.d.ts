@@ -10,6 +10,8 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_APPCHECK_DEBUG_TOKEN?: string;
   /** @deprecated Use VITE_FIREBASE_APPCHECK_DEBUG_TOKEN. */
   readonly VITE_APPCHECK_DEBUG_TOKEN?: string;
+  readonly VITE_FIREBASE_RECAPTCHA_ENTERPRISE_SITE_KEY?: string;
+  /** @deprecated Use VITE_FIREBASE_RECAPTCHA_ENTERPRISE_SITE_KEY. */
   readonly VITE_RECAPTCHA_ENTERPRISE_SITE_KEY?: string;
   readonly VITE_GOOGLE_OAUTH_CLIENT_ID?: string;
 }

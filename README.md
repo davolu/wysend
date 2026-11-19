@@ -84,7 +84,7 @@ The public web config for `myfirstproject-76495` is the default in [`src/firebas
    - Enter any UUID you generate yourself, or leave the field empty once, set `self.FIREBASE_APPCHECK_DEBUG_TOKEN = true` in a local build, reload, and copy the token the SDK prints in the side-panel console (`Firebase App Check debug token: ...`).
    - Save it in the panel. It is stored in `chrome.storage.local` on this profile. For `npm run smoke:cloud` and for a local build, put `VITE_FIREBASE_APPCHECK_DEBUG_TOKEN` in `.env.local`. That file is gitignored. A token compiled into `dist` should not be published.
    - In the console, open **Security → App Check → Apps → Manage debug tokens** and register the same token.
-   - A production website can use a score-based [reCAPTCHA Enterprise](https://firebase.google.com/docs/app-check/web/recaptcha-enterprise-provider) key in `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY`. Do not add `localhost` to a key you ship. The extension path remains the debug token.
+   - The web app's public reCAPTCHA Enterprise site key is the default for `VITE_FIREBASE_RECAPTCHA_ENTERPRISE_SITE_KEY`. The debug path passes that key to `ReCaptchaEnterpriseProvider` and sets `globalThis.FIREBASE_APPCHECK_DEBUG_TOKEN` and `self.FIREBASE_APPCHECK_DEBUG_TOKEN` before `initializeAppCheck`. Do not add `localhost` to a key you ship. The extension path remains the debug token, because Manifest V3 cannot load the reCAPTCHA script.
 
 6. **Authentication, optional.** Enable **Anonymous** under Authentication → Sign-in method. That is enough for counts and team policies. Google sign-in also needs an OAuth client whose redirect URI is `https://YOUR_EXTENSION_ID.chromiumapp.org/`, and `VITE_GOOGLE_OAUTH_CLIENT_ID` set before you rebuild.
 

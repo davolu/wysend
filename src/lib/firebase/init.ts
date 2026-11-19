@@ -1,6 +1,7 @@
 import { initializeApp, type FirebaseApp } from "firebase/app";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider, type AppCheck } from "firebase/app-check";
-import { resolveFirebaseConfig, type FirebasePublicConfig } from "../../firebaseConfig";
+import { resolveFirebaseConfig, resolveRecaptchaEnterpriseSiteKey, type FirebasePublicConfig } from "../../firebaseConfig";
+import { installAppCheckDebugToken } from "./app-check-debug";
 
 export type { FirebasePublicConfig };
 
@@ -12,10 +13,6 @@ export interface AppCheckStatus {
   projectId: string | null;
   detail: string;
 }
-
-type DebugGlobal = typeof globalThis & {
-  FIREBASE_APPCHECK_DEBUG_TOKEN?: string | boolean;
-};
 
 let app: FirebaseApp | null = null;
 let appCheck: AppCheck | null = null;
@@ -70,7 +67,10 @@ export function ensureAppCheck(debugToken?: string): AppCheckStatus {
     || import.meta.env.VITE_APPCHECK_DEBUG_TOKEN
     || ""
   ).trim();
-  const siteKey = (import.meta.env.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY || "").trim();
+  const siteKey = resolveRecaptchaEnterpriseSiteKey({
+    VITE_FIREBASE_RECAPTCHA_ENTERPRISE_SITE_KEY: import.meta.env.VITE_FIREBASE_RECAPTCHA_ENTERPRISE_SITE_KEY,
+    VITE_RECAPTCHA_ENTERPRISE_SITE_KEY: import.meta.env.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY,
+  });
   if (!token && !siteKey) {
     status = {
       ready: false,
@@ -80,11 +80,9 @@ export function ensureAppCheck(debugToken?: string): AppCheckStatus {
     };
     return status;
   }
-  if (token) {
-    (globalThis as DebugGlobal).FIREBASE_APPCHECK_DEBUG_TOKEN = token;
-  }
+  if (token) installAppCheckDebugToken(token);
   appCheck = initializeAppCheck(getFirebaseApp(), {
-    provider: new ReCaptchaEnterpriseProvider(siteKey || "extension-debug-placeholder"),
+    provider: new ReCaptchaEnterpriseProvider(siteKey),
     isTokenAutoRefreshEnabled: true,
   });
   status = {

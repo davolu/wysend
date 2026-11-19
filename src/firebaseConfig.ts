@@ -21,6 +21,9 @@ export const DEFAULT_FIREBASE_CONFIG: FirebasePublicConfig = {
   appId: "1:743316150934:web:1d298ce2ca25741634c0b7",
 };
 
+/** Public reCAPTCHA Enterprise site key registered for this web app. */
+export const DEFAULT_RECAPTCHA_ENTERPRISE_SITE_KEY = "6Lf28icuAAAAAI_YndgCvuy1eAJeaq5Bjo0wL6Bb";
+
 export interface FirebaseEnv {
   VITE_FIREBASE_API_KEY?: string;
   VITE_FIREBASE_AUTH_DOMAIN?: string;
@@ -28,6 +31,8 @@ export interface FirebaseEnv {
   VITE_FIREBASE_STORAGE_BUCKET?: string;
   VITE_FIREBASE_MESSAGING_SENDER_ID?: string;
   VITE_FIREBASE_APP_ID?: string;
+  VITE_FIREBASE_RECAPTCHA_ENTERPRISE_SITE_KEY?: string;
+  VITE_RECAPTCHA_ENTERPRISE_SITE_KEY?: string;
 }
 
 function override(value: string | undefined, fallback: string): string {
@@ -44,4 +49,11 @@ export function resolveFirebaseConfig(env: FirebaseEnv = {}): FirebasePublicConf
     messagingSenderId: override(env.VITE_FIREBASE_MESSAGING_SENDER_ID, DEFAULT_FIREBASE_CONFIG.messagingSenderId),
     appId: override(env.VITE_FIREBASE_APP_ID, DEFAULT_FIREBASE_CONFIG.appId),
   };
+}
+
+export function resolveRecaptchaEnterpriseSiteKey(env: FirebaseEnv = {}): string {
+  return override(
+    env.VITE_FIREBASE_RECAPTCHA_ENTERPRISE_SITE_KEY || env.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY,
+    DEFAULT_RECAPTCHA_ENTERPRISE_SITE_KEY,
+  );
 }

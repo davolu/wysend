@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { DEFAULT_FIREBASE_CONFIG, resolveFirebaseConfig } from "../src/firebaseConfig";
+import { afterEach, describe, expect, it } from "vitest";
+import { DEFAULT_FIREBASE_CONFIG, DEFAULT_RECAPTCHA_ENTERPRISE_SITE_KEY, resolveFirebaseConfig, resolveRecaptchaEnterpriseSiteKey } from "../src/firebaseConfig";
+import { installAppCheckDebugToken } from "../src/lib/firebase/app-check-debug";
 import { prepareCloudAssist } from "../src/lib/redaction/cloud";
 import { redact, rehydrate } from "../src/lib/redaction/engine";
 import { SMOKE_SAMPLES } from "../src/lib/redaction/smoke-samples";
@@ -11,6 +12,23 @@ describe("firebase config", () => {
     expect(resolveFirebaseConfig().apiKey).toBe(DEFAULT_FIREBASE_CONFIG.apiKey);
     expect(resolveFirebaseConfig({ VITE_FIREBASE_PROJECT_ID: "other-project" }).projectId).toBe("other-project");
     expect(resolveFirebaseConfig({ VITE_FIREBASE_API_KEY: "  " }).apiKey).toBe(DEFAULT_FIREBASE_CONFIG.apiKey);
+    expect(resolveRecaptchaEnterpriseSiteKey()).toBe(DEFAULT_RECAPTCHA_ENTERPRISE_SITE_KEY);
+    expect(resolveRecaptchaEnterpriseSiteKey({
+      VITE_FIREBASE_RECAPTCHA_ENTERPRISE_SITE_KEY: "override-key",
+    })).toBe("override-key");
+  });
+
+  afterEach(() => {
+    const host = globalThis as { FIREBASE_APPCHECK_DEBUG_TOKEN?: string; self?: unknown };
+    delete host.FIREBASE_APPCHECK_DEBUG_TOKEN;
+    delete host.self;
+  });
+
+  it("publishes the App Check debug token on globalThis and self before initialization", () => {
+    installAppCheckDebugToken("debug-token-value");
+    const host = globalThis as { FIREBASE_APPCHECK_DEBUG_TOKEN?: string; self?: { FIREBASE_APPCHECK_DEBUG_TOKEN?: string } };
+    expect(host.FIREBASE_APPCHECK_DEBUG_TOKEN).toBe("debug-token-value");
+    expect((self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN?: string }).FIREBASE_APPCHECK_DEBUG_TOKEN).toBe("debug-token-value");
   });
 });
 

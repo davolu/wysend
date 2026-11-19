@@ -9,7 +9,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 import { getAI, getGenerativeModel, GoogleAIBackend, InferenceMode } from "firebase/ai";
-import { resolveFirebaseConfig } from "../src/firebaseConfig";
+import { resolveFirebaseConfig, resolveRecaptchaEnterpriseSiteKey } from "../src/firebaseConfig";
+import { installAppCheckDebugToken } from "../src/lib/firebase/app-check-debug";
 import { prepareCloudAssist } from "../src/lib/redaction/cloud";
 import { redact, rehydrate } from "../src/lib/redaction/engine";
 import { SMOKE_SAMPLES } from "../src/lib/redaction/smoke-samples";
@@ -44,6 +45,7 @@ loadEnvFile(".env.local");
 loadEnvFile(".env");
 
 const config = resolveFirebaseConfig(process.env);
+const recaptchaSiteKey = resolveRecaptchaEnterpriseSiteKey(process.env);
 const debugToken = (
   process.env.VITE_FIREBASE_APPCHECK_DEBUG_TOKEN
   || process.env.VITE_APPCHECK_DEBUG_TOKEN
@@ -61,13 +63,13 @@ if (!debugToken) {
     "App Check: VITE_FIREBASE_APPCHECK_DEBUG_TOKEN is not set. Put it in .env.local (gitignored). Debug exchange cannot run. The cloud call will still be attempted.",
   );
 } else {
-  (globalThis as { FIREBASE_APPCHECK_DEBUG_TOKEN?: string }).FIREBASE_APPCHECK_DEBUG_TOKEN = debugToken;
+  installAppCheckDebugToken(debugToken);
   try {
     initializeAppCheck(app, {
-      provider: new ReCaptchaEnterpriseProvider("extension-debug-placeholder"),
+      provider: new ReCaptchaEnterpriseProvider(recaptchaSiteKey),
       isTokenAutoRefreshEnabled: true,
     });
-    console.log("App Check: debug provider initialized in this process. The token value is not printed.");
+    console.log("App Check: debug token was set on globalThis and self before initializeAppCheck. ReCaptchaEnterpriseProvider is using the configured site key. The token value is not printed.");
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.log("App Check cannot be initialized in Node. The cloud call will still be attempted.");
