@@ -1,8 +1,8 @@
 {
-  "name": "local-redact",
+  "name": "wysend",
   "version": "1.0.0",
   "private": true,
-  "description": "Finish sensitive work on redacted text. On-device detection, an auditable cloud payload, and local restoration.",
+  "description": "Wysend: the cloud never sees your secrets. You see exactly what it sees.",
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {

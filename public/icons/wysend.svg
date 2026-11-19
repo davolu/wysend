@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Wysend">
+  <rect width="128" height="128" rx="28" fill="#14352c"/>
+  <ellipse cx="51.2" cy="64" rx="28.16" ry="16.64" fill="#f4efe6"/>
+  <polygon points="66.56,43.52 107.52,64 66.56,84.48" fill="#f4efe6"/>
+  <circle cx="46.08" cy="64" r="12.16" fill="#d6f25c"/>
+  <circle cx="46.08" cy="64" r="7.04" fill="#14352c"/>
+</svg>

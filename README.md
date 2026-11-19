@@ -1,12 +1,14 @@
-# Local Redact
+# Wysend
 
-The name is a placeholder. It lives only in [`src/brand.ts`](src/brand.ts). Change `PRODUCT_NAME` there when the final name is chosen, then rebuild. The side panel, the generated manifest, and this README use that string.
+Wysend is short for “what you see is what you send,” pronounced WHY-send. The name and tagline live in [`src/brand.ts`](src/brand.ts). The side panel and the generated manifest import them.
 
-Local Redact lets you finish sensitive work in the browser. Select a complaint, a contract excerpt, a log, or an email and pick a task: draft a reply, summarize, analyze, or explain. Sensitive spans are removed on the device. You read the exact payload that would leave, approve it, and a cloud model does the task on that text only. Placeholders are restored locally, and you review the result before copying or inserting it.
+**The cloud never sees your secrets. You see exactly what it sees.**
+
+Select a complaint, a contract excerpt, a log, or an email and pick a task: draft a reply, summarize, analyze, or explain. Sensitive spans are removed on the device. You read the exact payload that would leave, approve it, and a cloud model does the task on that text only. Placeholders are restored locally, and you review the result before copying or inserting it.
 
 Paste protection is still there. It is a secondary control, not the product.
 
-People already redact pastes. PasteGuard, Cloakpaste, and Hushpaste are examples. This project does not claim to be the first or the only tool of its kind. The difference is hybrid task completion: an on-device pass over the raw text, an auditable outbound payload, and local rehydration.
+Other tools already redact a paste. Wysend is for finishing the task: an on-device pass over the raw text, an auditable outbound payload, and local rehydration.
 
 ## Hybrid routing
 
