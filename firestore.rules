@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function entityKeys() {
+      return [
+        "PERSON", "PHONE", "EMAIL", "ADDRESS", "BANK",
+        "BVN", "NIN", "CARD", "SSN", "API_KEY", "SECRET"
+      ];
+    }
+
+    function byTypeOk(m) {
+      return m is map
+        && m.size() <= 12
+        && m.keys().hasOnly(entityKeys())
+        && (!("PERSON" in m) || m.PERSON is number)
+        && (!("PHONE" in m) || m.PHONE is number)
+        && (!("EMAIL" in m) || m.EMAIL is number)
+        && (!("ADDRESS" in m) || m.ADDRESS is number)
+        && (!("BANK" in m) || m.BANK is number)
+        && (!("BVN" in m) || m.BVN is number)
+        && (!("NIN" in m) || m.NIN is number)
+        && (!("CARD" in m) || m.CARD is number)
+        && (!("SSN" in m) || m.SSN is number)
+        && (!("API_KEY" in m) || m.API_KEY is number)
+        && (!("SECRET" in m) || m.SECRET is number);
+    }
+
+    function policiesOk(m) {
+      return m is map
+        && m.size() <= 80
+        && m.values().hasOnly(["block", "warn", "auto-redact"]);
+    }
+
+    match /stats/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create, update: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(["secretsCaught", "byType", "updatedAt"])
+        && request.resource.data.secretsCaught is number
+        && byTypeOk(request.resource.data.byType)
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if false;
+    }
+
+    match /teams/{teamId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn()
+        && teamId.matches('^[A-Za-z0-9_\\-]{4,40}$')
+        && request.resource.data.keys().hasOnly(["name", "defaultPolicy", "sitePolicies", "enabledTypes", "updatedAt"])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 60
+        && request.resource.data.defaultPolicy in ["block", "warn", "auto-redact"]
+        && policiesOk(request.resource.data.sitePolicies)
+        && request.resource.data.enabledTypes is list
+        && request.resource.data.enabledTypes.size() <= 12
+        && request.resource.data.enabledTypes.hasOnly(entityKeys())
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

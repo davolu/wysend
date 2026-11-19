@@ -1,0 +1,53 @@
+{
+  "parameters": {
+    "redaction_policy": {
+      "defaultValue": {
+        "value": "{\"defaultPolicy\":\"warn\",\"enabled\":{\"PERSON\":true,\"PHONE\":true,\"EMAIL\":true,\"ADDRESS\":true,\"BANK\":true,\"BVN\":true,\"NIN\":true,\"CARD\":true,\"SSN\":true,\"API_KEY\":true,\"SECRET\":true}}"
+      },
+      "description": "Which entity types the extension removes, and the default site policy. This cannot disable the cloud payload guard.",
+      "valueType": "STRING"
+    },
+    "on_device_prompt": {
+      "defaultValue": {
+        "value": "Find sensitive spans in the user text. Reply with JSON only. Copy each text value exactly from the input. Skip placeholders such as [PERSON_1]."
+      },
+      "description": "System prompt for on-device detection. Raw text is only sent to ONLY_ON_DEVICE.",
+      "valueType": "STRING"
+    },
+    "cloud_reply_prompt": {
+      "defaultValue": {
+        "value": "Draft a short, polite reply. Keep every placeholder exactly as written. Do not invent personal data."
+      },
+      "description": "Cloud prompt for the draft-reply task. The extension sends this with already redacted text.",
+      "valueType": "STRING"
+    },
+    "cloud_summarize_prompt": {
+      "defaultValue": {
+        "value": "Summarize the message. It is already redacted. Keep every placeholder exactly as written."
+      },
+      "description": "Cloud prompt for summarize.",
+      "valueType": "STRING"
+    },
+    "cloud_analyze_prompt": {
+      "defaultValue": {
+        "value": "Analyze the message. Keep every placeholder exactly as written. Do not guess real names, numbers, or secrets."
+      },
+      "description": "Cloud prompt for analyze.",
+      "valueType": "STRING"
+    },
+    "cloud_explain_prompt": {
+      "defaultValue": {
+        "value": "Explain the message in plain language. Keep every placeholder exactly as written."
+      },
+      "description": "Cloud prompt for explain.",
+      "valueType": "STRING"
+    },
+    "cloud_model": {
+      "defaultValue": {
+        "value": "gemini-3.5-flash-lite"
+      },
+      "description": "Cloud model name for task completion. The SDK default is gemini-3.5-flash-lite.",
+      "valueType": "STRING"
+    }
+  }
+}

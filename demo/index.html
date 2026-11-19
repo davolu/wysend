@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wysend — sample desk</title>
+    <style>
+      :root { color-scheme: light; --ink: #1c1915; --muted: #5e584e; --line: #ddd4c4; --bg: #f3efe6; --card: #fffdf8; --green: #0f5c44; }
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: "Avenir Next", "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+      main { width: min(880px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 64px; }
+      h1 { font-family: "Iowan Old Style", Palatino, Georgia, serif; font-size: clamp(40px, 6vw, 64px); line-height: 0.92; margin: 0; letter-spacing: -0.03em; }
+      .kicker { letter-spacing: 0.14em; text-transform: uppercase; color: var(--green); font-size: 12px; margin: 0 0 8px; }
+      .lede { max-width: 62ch; color: var(--muted); line-height: 1.5; }
+      .grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 16px; margin-top: 24px; }
+      article, form { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 18px; }
+      h2 { font-family: "Iowan Old Style", Palatino, Georgia, serif; font-size: 28px; margin: 0 0 8px; }
+      pre { white-space: pre-wrap; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; line-height: 1.5; margin: 0; }
+      textarea { width: 100%; min-height: 220px; border: 1px solid var(--line); border-radius: 14px; padding: 12px; font: inherit; background: #f7f3eb; }
+      button { margin-top: 10px; border: 0; border-radius: 999px; background: var(--green); color: #f4f1ea; padding: 10px 14px; font: inherit; cursor: pointer; }
+      .thread { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+      .bubble { background: #f7f3eb; border-radius: 14px; padding: 10px 12px; white-space: pre-wrap; }
+      @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="kicker">Sample desk</p>
+      <h1>Wysend</h1>
+      <p class="lede">The cloud never sees your secrets. You see exactly what it sees. Select the complaint, then draft a reply, summarize, analyze, or explain. The page itself does not call a model. Open it with <code>npm run demo</code> so the extension can see it. A file:// tab will not run the content script.</p>
+      <div class="grid">
+        <article>
+          <h2>Customer complaint</h2>
+          <p class="lede">Select this text. Right-click and choose the extension, or open the side panel and click Use selection.</p>
+          <pre id="complaint">Hello,
+
+Please update the file for Maya Chen. She called about invoice 1842. Her mobile is +1 415 555 0198 and her email is maya.chen@example.com. The contract address is 18 Baker Street, London.
+
+IBAN: DE89 3704 0044 0532 0130 00
+Card: 4242 4242 4242 4242
+SSN: 219-09-9999
+
+The staging key is sk-live-51Hx9a2EXAMPLEKEY1234567890
+
+Thanks,
+Luis Ortega
+</pre>
+        </article>
+        <form id="composer">
+          <h2>Reply box</h2>
+          <p class="lede">Paste is the secondary check. Sending is intercepted when the draft still has secrets.</p>
+          <textarea name="draft" aria-label="Reply draft" placeholder="Paste or insert a reply here"></textarea>
+          <button type="submit">Send reply</button>
+          <div class="thread" id="thread"></div>
+        </form>
+      </div>
+    </main>
+    <script>
+      const form = document.getElementById("composer");
+      const thread = document.getElementById("thread");
+      form.addEventListener("submit", (event) => {
+        if (event.defaultPrevented) return;
+        event.preventDefault();
+        const field = form.elements.draft;
+        const text = field.value.trim();
+        if (!text) return;
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = text;
+        thread.prepend(bubble);
+        field.value = "";
+      });
+    </script>
+  </body>
+</html>
