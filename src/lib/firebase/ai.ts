@@ -16,7 +16,7 @@ import {
 import type { Vault } from "../redaction/types";
 import { ensureAppCheck, getFirebaseApp } from "./init";
 
-const DEFAULT_CLOUD_MODEL = "gemini-3.5-flash-lite";
+export const DEFAULT_CLOUD_MODEL = "gemini-3.5-flash-lite";
 
 function entitySchema(): Record<string, unknown> {
   return {

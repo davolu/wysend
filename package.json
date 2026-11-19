@@ -11,7 +11,8 @@
     "build": "tsc --noEmit && vite build && vite build --mode content && vite build --mode background && node scripts/assemble.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "eval": "vitest run tests/eval.test.ts"
+    "eval": "vitest run tests/eval.test.ts",
+    "smoke:cloud": "tsx scripts/smoke-cloud.ts"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,7 @@
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.7.0",
     "jsdom": "^26.1.0",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^6.4.6",
     "vitest": "^3.2.7"

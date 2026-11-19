@@ -11,7 +11,7 @@ export default defineConfig({
       VITE_FIREBASE_STORAGE_BUCKET: "test-project.appspot.com",
       VITE_FIREBASE_MESSAGING_SENDER_ID: "1234567890",
       VITE_FIREBASE_APP_ID: "1:1234567890:web:abc",
-      VITE_APPCHECK_DEBUG_TOKEN: "test-debug-token",
+      VITE_FIREBASE_APPCHECK_DEBUG_TOKEN: "test-debug-token",
     },
   },
 });

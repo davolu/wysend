@@ -69,11 +69,11 @@ Regenerate the table with `npm run eval`. The score means the rules agree with t
 
 ## What you have to do in Firebase
 
-The extension runs locally with rules-only redaction and the sample desk even before Firebase is filled in. Cloud tasks, Nano through the SDK, Remote Config, Auth, and Firestore do nothing until you complete the steps below. Nobody else can do these for you. Do not commit `.env`, a debug token, or a built `dist` that contains one.
+The public web config for `myfirstproject-76495` is the default in [`src/firebaseConfig.ts`](src/firebaseConfig.ts). Environment variables still override it. Do not commit `.env`, `.env.local`, an App Check debug token, or a built `dist` that contains one.
 
-1. **Create a Firebase project.** In the [Firebase console](https://console.firebase.google.com/), create a project. Google Analytics is optional. You do not need the Blaze plan for the default text model. Confirm the current model on the [Firebase AI Logic models list](https://firebase.google.com/docs/ai-logic/models) before you rely on a name other than `gemini-3.5-flash-lite`.
+1. **Create a Firebase project.** Done for `myfirstproject-76495`. A new project still starts in the [Firebase console](https://console.firebase.google.com/). Google Analytics is optional. You do not need the Blaze plan for the default text model. The cloud task uses `gemini-3.5-flash-lite`. Confirm that name on the [Firebase AI Logic models list](https://firebase.google.com/docs/ai-logic/models) if a call returns "model not found".
 
-2. **Register a Web app and copy its config.** Project settings → Your apps → Web. Add the six values to a new `.env` file, using [`.env.example`](.env.example) as the template. Rebuild after every change to `.env`. The API key is a public client identifier. It is still not something to paste into a ticket.
+2. **Register a Web app.** Done. The six public fields are committed. To point a build at a different app, set `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, and `VITE_FIREBASE_APP_ID` in `.env.local`, then rebuild.
 
 3. **Turn on Firebase AI Logic with the Gemini Developer API.** In the console open **AI Services → AI Logic → Get started** and choose the Gemini Developer API. Or, after `npx -y firebase-tools@latest login` and `npx -y firebase-tools@latest use YOUR_PROJECT_ID`, run `npx -y firebase-tools@latest init ailogic`. Registering the web app does not enable the API. Without this step, cloud calls fail with permission denied.
 
@@ -82,7 +82,7 @@ The extension runs locally with rules-only redaction and the sample desk even be
 5. **Create the extension debug token.** Manifest V3 pages cannot load the remote reCAPTCHA script, so reCAPTCHA Enterprise does not attest this extension by itself. Use the debug provider:
    - Open the side panel after a build.
    - Enter any UUID you generate yourself, or leave the field empty once, set `self.FIREBASE_APPCHECK_DEBUG_TOKEN = true` in a local build, reload, and copy the token the SDK prints in the side-panel console (`Firebase App Check debug token: ...`).
-   - Save it in the panel. It is stored in `chrome.storage.local` on this profile. Putting `VITE_APPCHECK_DEBUG_TOKEN` in `.env` also works, but that value is compiled into `dist`. Do not publish that build.
+   - Save it in the panel. It is stored in `chrome.storage.local` on this profile. For `npm run smoke:cloud` and for a local build, put `VITE_FIREBASE_APPCHECK_DEBUG_TOKEN` in `.env.local`. That file is gitignored. A token compiled into `dist` should not be published.
    - In the console, open **Security → App Check → Apps → Manage debug tokens** and register the same token.
    - A production website can use a score-based [reCAPTCHA Enterprise](https://firebase.google.com/docs/app-check/web/recaptcha-enterprise-provider) key in `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY`. Do not add `localhost` to a key you ship. The extension path remains the debug token.
 
@@ -103,6 +103,7 @@ npm install
 npm test          # redaction, rehydration, payload guard, routing, eval
 npm run eval      # prints the precision/recall table
 npm run build     # dist/ is the unpacked extension
+npm run smoke:cloud   # Node 20+. Live ONLY_IN_CLOUD call. Needs the debug token in .env.local
 npm run demo      # sample desk at http://127.0.0.1:43123
 npm run dev       # side panel layout at http://127.0.0.1:43117/sidepanel.html
 ```
