@@ -1,0 +1,35 @@
+{
+  "name": "local-redact",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Finish sensitive work on redacted text. On-device detection, an auditable cloud payload, and local restoration.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 43117 --strictPort --host 127.0.0.1",
+    "demo": "vite --config vite.demo.config.ts",
+    "build": "tsc --noEmit && vite build && vite build --mode content && vite build --mode background && node scripts/assemble.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "eval": "vitest run tests/eval.test.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://origin.cursor.com/git/davidoluyale/tmp-3d6d990e497167ae.git"
+  },
+  "dependencies": {
+    "firebase": "^13.4.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.3.7",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "jsdom": "^26.1.0",
+    "typescript": "^7.0.2",
+    "vite": "^6.4.6",
+    "vitest": "^3.2.7"
+  }
+}
