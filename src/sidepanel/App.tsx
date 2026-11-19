@@ -23,7 +23,7 @@ export function App() {
   const panel = usePanel();
   const site = panel.host || panel.selection?.hostname || "";
   const policy = policyForHost(site, panel.settings);
-  const reviewed = panel.showRestored && panel.assist ? panel.restored : panel.assist?.text ?? "";
+  const reviewed = panel.assist ? (panel.showRestored ? panel.restored : panel.guardedText) : "";
   const detectBadge = sourceLabel(panel.detectInference, panel.detectSource === "on_device" ? "On-device" : "Rules");
   const taskBadge = panel.assist ? sourceLabel(panel.assist.inferenceSource, "Source not reported") : "Not run";
 
@@ -130,6 +130,7 @@ export function App() {
           <>
             <span className={badgeClass(taskBadge)}><i />{taskBadge}</span>
             <div className="result" aria-label="Task result">{reviewed}</div>
+            {panel.outputWarning && <p className="warn" role="status">{panel.outputWarning}</p>}
             <label className="toggle">
               <span>Show restored values<small>Restoration happens in this panel. The cloud reply still has placeholders.</small></span>
               <input type="checkbox" checked={panel.showRestored} onChange={(event) => panel.setShowRestored(event.target.checked)} />

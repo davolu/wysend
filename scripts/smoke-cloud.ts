@@ -3,16 +3,19 @@
  *
  *   VITE_FIREBASE_APPCHECK_DEBUG_TOKEN=... npm run smoke:cloud
  *
- * The token is read from the environment or from .env.local. It is never printed.
+ * The token is read from the environment or from .env.local.
+ * initializeAppCheck logs "Firebase App Check debug token: <token>".
+ * suppressAppCheckDebugTokenConsole() drops that line, and errors are
+ * redacted with the token value, so the token never appears in the output.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 import { getAI, getGenerativeModel, GoogleAIBackend, InferenceMode } from "firebase/ai";
 import { resolveFirebaseConfig, resolveRecaptchaEnterpriseSiteKey } from "../src/firebaseConfig";
-import { installAppCheckDebugToken } from "../src/lib/firebase/app-check-debug";
+import { installAppCheckDebugToken, suppressAppCheckDebugTokenConsole } from "../src/lib/firebase/app-check-debug";
 import { prepareCloudAssist } from "../src/lib/redaction/cloud";
-import { redact, rehydrate } from "../src/lib/redaction/engine";
+import { guardModelPlaceholders, modelOutputWarning, redact, rehydrate } from "../src/lib/redaction/engine";
 import { SMOKE_SAMPLES } from "../src/lib/redaction/smoke-samples";
 import { emptyEnabled, emptyVault } from "../src/lib/redaction/types";
 import { DEFAULT_CLOUD_MODEL } from "../src/lib/firebase/ai";
@@ -41,6 +44,7 @@ function hideSecret(message: string, secret: string): string {
   return message.split(secret).join("[redacted-secret]");
 }
 
+suppressAppCheckDebugTokenConsole();
 loadEnvFile(".env.local");
 loadEnvFile(".env");
 
@@ -107,8 +111,11 @@ for (const sample of SMOKE_SAMPLES) {
     console.log(`Cloud inferenceSource: ${source}`);
     console.log("Cloud response:");
     console.log(cloudText);
+    const guarded = guardModelPlaceholders(cloudText, redacted.vault);
+    const warning = modelOutputWarning(guarded);
+    if (warning) console.log(warning);
     console.log("Restored locally:");
-    console.log(rehydrate(cloudText, redacted.vault));
+    console.log(rehydrate(guarded.text, redacted.vault));
   } catch (error) {
     failed = true;
     const message = error instanceof Error ? error.message : String(error);

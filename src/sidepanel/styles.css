@@ -151,7 +151,7 @@ h1 {
 
 .danger { background: var(--heat); border-color: var(--heat); color: white; }
 
-.note, .error, .ok {
+.note, .error, .ok, .warn {
   font-size: 13px;
   line-height: 1.45;
   margin: 8px 0 0;
@@ -160,6 +160,7 @@ h1 {
 .note { color: var(--muted); }
 .error { color: var(--heat); }
 .ok { color: var(--green); }
+.warn { color: var(--warn); }
 
 .diff, .payload, .result {
   font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;

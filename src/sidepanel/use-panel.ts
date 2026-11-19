@@ -9,7 +9,7 @@ import { STORAGE_KEYS, type DiffRecord, type RuntimeMessage, type SelectionCaptu
 import { describeAvailability, probeOnDeviceAvailability } from "../lib/nano";
 import { applyRemotePolicy, applyTeamPolicy, defaultSettings, hostnameFromUrl, teamPolicyFromSettings, type Settings } from "../lib/policy";
 import { BUILTIN_PROMPTS, prepareCloudAssist, type AssistTask, type PromptSet } from "../lib/redaction/cloud";
-import { redact, rehydrate } from "../lib/redaction/engine";
+import { guardModelPlaceholders, modelOutputWarning, redact, rehydrate } from "../lib/redaction/engine";
 import { SAMPLE_TEXT } from "../lib/redaction/sample";
 import { addFindings, newFindings } from "../lib/redaction/stats";
 import { emptyStats, emptyVault, type EntityType, type InferenceLabel, type ModelEntity, type RedactResult, type Stats, type Vault } from "../lib/redaction/types";
@@ -28,6 +28,9 @@ export interface PanelModel {
   approved: boolean;
   digest: string;
   assist: { text: string; inferenceSource: InferenceLabel; mode: Settings["cloudMode"] } | null;
+  guardedText: string;
+  unknownPlaceholders: string[];
+  outputWarning: string;
   showRestored: boolean;
   setShowRestored: (value: boolean) => void;
   restored: string;
@@ -124,7 +127,11 @@ export function usePanel(): PanelModel {
     }
   }, [redacted, task, prompts]);
 
-  const restored = assist ? rehydrate(assist.text, redacted?.vault ?? vault) : "";
+  const guarded = useMemo(() => {
+    if (!assist) return { text: "", unknown: [] as string[], removedSignature: false };
+    return guardModelPlaceholders(assist.text, redacted?.vault ?? vault);
+  }, [assist, redacted, vault]);
+  const restored = assist ? rehydrate(guarded.text, redacted?.vault ?? vault) : "";
 
   useEffect(() => {
     if (!audit?.ok) {
@@ -361,7 +368,7 @@ export function usePanel(): PanelModel {
     }
   }, [audit, redacted, approvedPayload, task, settings.cloudMode, remote.model, extension]);
 
-  const reviewedText = showRestored && assist ? restored : assist?.text ?? "";
+  const reviewedText = !assist ? "" : showRestored ? restored : guarded.text;
 
   const copyResult = useCallback(async () => {
     if (!reviewedText) return;
@@ -400,6 +407,9 @@ export function usePanel(): PanelModel {
     approved: Boolean(audit?.ok && approvedPayload === audit.payload),
     digest,
     assist,
+    guardedText: guarded.text,
+    unknownPlaceholders: guarded.unknown,
+    outputWarning: modelOutputWarning(guarded),
     showRestored,
     setShowRestored,
     restored,

@@ -83,6 +83,11 @@ describe("Firebase AI Logic routing", () => {
       expect.anything(),
       expect.objectContaining({ mode: "only_in_cloud" }),
     );
+    const options = vi.mocked(getGenerativeModel).mock.calls.at(-1)?.[1] as {
+      onDeviceParams?: { createOptions?: { initialPrompts?: { content?: { value?: string }[] }[] } };
+    };
+    const system = options.onDeviceParams?.createOptions?.initialPrompts?.[0]?.content?.[0]?.value ?? "";
+    expect(system).toContain("Do not invent placeholders, names, or signatures.");
   });
 
   it("does not call the model when the approved payload still has raw PII", async () => {

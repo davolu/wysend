@@ -70,6 +70,77 @@ export function rehydrate(text: string, vault: Vault): string {
   return out;
 }
 
+const PLACEHOLDER_PATTERN = /\[[A-Z][A-Z0-9]*_\d+\]/g;
+
+export function placeholdersIn(text: string): string[] {
+  return [...new Set(text.match(new RegExp(PLACEHOLDER_PATTERN.source, "g")) ?? [])];
+}
+
+export function unknownPlaceholders(text: string, vault: Vault): string[] {
+  const known = new Set(vault.entries.map((entry) => entry.placeholder));
+  return placeholdersIn(text).filter((token) => !known.has(token));
+}
+
+/**
+ * Drops placeholders the model invented. Known placeholders stay so restore can fill them.
+ * A line that was only an invented placeholder is removed with it.
+ */
+export function stripUnknownPlaceholders(text: string, unknown: readonly string[]): string {
+  if (unknown.length === 0) return text;
+  const tokens = [...unknown].sort((a, b) => b.length - a.length);
+  const lines = text.split("\n").flatMap((line) => {
+    const hadUnknown = tokens.some((token) => line.includes(token));
+    let next = line;
+    for (const token of tokens) next = next.split(token).join("");
+    next = next.replace(/[ \t]{2,}/g, " ").replace(/[ \t]+([,.;:!?])/g, "$1").replace(/^[ \t]+|[ \t]+$/g, "");
+    if (hadUnknown && (next === "" || /^[-–—]+$/.test(next))) return [];
+    return [next];
+  });
+  return lines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function stripRawSignatureLines(text: string, vault: Vault): { text: string; removed: boolean } {
+  const names = vault.entries
+    .filter((entry) => entry.type === "PERSON" && entry.value.trim())
+    .map((entry) => entry.value.trim());
+  if (names.length === 0) return { text, removed: false };
+  let removed = false;
+  const lines = text.split("\n").filter((line) => {
+    const trimmed = line.trim().replace(/[,.]$/, "");
+    const invented = names.some((name) => trimmed === name);
+    if (invented) removed = true;
+    return !invented;
+  });
+  return {
+    text: lines.join("\n").replace(/\n{3,}/g, "\n\n").trim(),
+    removed,
+  };
+}
+
+export function guardModelPlaceholders(text: string, vault: Vault): { text: string; unknown: string[]; removedSignature: boolean } {
+  const unknown = unknownPlaceholders(text, vault);
+  const stripped = stripUnknownPlaceholders(text, unknown);
+  const signatures = stripRawSignatureLines(stripped, vault);
+  return { unknown, text: signatures.text, removedSignature: signatures.removed };
+}
+
+export function unknownPlaceholderWarning(unknown: readonly string[]): string {
+  if (unknown.length === 0) return "";
+  const list = unknown.join(", ");
+  if (unknown.length === 1) {
+    return `Removed ${list} before restore. It was not in the approved payload, so it cannot be filled in.`;
+  }
+  return `Removed ${list} before restore. They were not in the approved payload, so they cannot be filled in.`;
+}
+
+export function modelOutputWarning(result: { unknown: readonly string[]; removedSignature: boolean }): string {
+  const parts = [unknownPlaceholderWarning(result.unknown)];
+  if (result.removedSignature) {
+    parts.push("Removed a signature that was not a placeholder from the payload.");
+  }
+  return parts.filter(Boolean).join(" ");
+}
+
 export function parseModelEntities(raw: string): ModelEntity[] {
   const start = raw.indexOf("{");
   const end = raw.lastIndexOf("}");

@@ -99,7 +99,7 @@ export function cloudModel(mode: "PREFER_IN_CLOUD" | "ONLY_IN_CLOUD", modelName:
             role: "system",
             content: [{
               type: "text",
-              value: "The message is already redacted. Preserve every placeholder exactly. Do not invent personal data.",
+              value: "The message is already redacted. Preserve every placeholder exactly. Use only placeholders already present in the message. Do not invent placeholders, names, or signatures.",
             }],
           },
         ],

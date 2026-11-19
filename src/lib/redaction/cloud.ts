@@ -1,5 +1,5 @@
 import { detectRules } from "./detectors";
-import { redact } from "./engine";
+import { placeholdersIn, redact } from "./engine";
 import { emptyEnabled, emptyVault, type EntityType, type Vault } from "./types";
 
 export type AssistTask = "reply" | "summarize" | "analyze" | "explain";
@@ -35,7 +35,7 @@ export const BUILTIN_PROMPTS: PromptSet = {
   summarize:
     "Summarize the message. It is already redacted. Keep every placeholder such as [PERSON_1] or [EMAIL_1] exactly as written. Do not guess what a placeholder stands for. Do not add personal data.",
   reply:
-    "Draft a short, polite reply. Keep every placeholder such as [PERSON_1] exactly as written. Do not invent personal data and do not replace a placeholder with a guess.",
+    "Draft a short, polite reply to the message. It is already redacted. Use only placeholders that already appear in the message, copied exactly. Do not invent placeholders, names, email addresses, phone numbers, or signatures. Do not sign with a made-up name. If you sign, use the sender's own placeholder from the message, or do not sign at all.",
   analyze:
     "Analyze the message for the reader. Keep every placeholder such as [PERSON_1] exactly as written. Point out decisions and risks without guessing real names, numbers, or secrets.",
   explain:
@@ -49,9 +49,16 @@ const TASK_KEY: Record<AssistTask, keyof Pick<PromptSet, "reply" | "summarize" |
   explain: "explain",
 };
 
+function replyPlaceholderRule(redactedText: string): string {
+  const allowed = placeholdersIn(redactedText);
+  const list = allowed.length > 0 ? allowed.join(", ") : "none";
+  return `Allowed placeholders: ${list}. These are the only placeholders you may write. Do not invent a name or a signature. If you sign, use a placeholder from this list that is the sender, or do not sign.`;
+}
+
 export function buildCloudPrompt(task: AssistTask, redactedText: string, prompts: PromptSet): string {
   const instruction = prompts[TASK_KEY[task]] || BUILTIN_PROMPTS[task];
-  return `${instruction}\n\nMessage:\n"""\n${redactedText}\n"""`;
+  const constraint = task === "reply" ? `\n\n${replyPlaceholderRule(redactedText)}` : "";
+  return `${instruction}${constraint}\n\nMessage:\n"""\n${redactedText}\n"""`;
 }
 
 function boundaryHit(payload: string, value: string): boolean {
